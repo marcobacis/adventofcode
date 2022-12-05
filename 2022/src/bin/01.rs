@@ -1,5 +1,3 @@
-use std::thread::current;
-
 pub fn part_one(input: &str) -> Option<u32> {
     let mut current_sum: u32 = 0;
     let mut max_sum: u32 = 0;
@@ -18,7 +16,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         }
     }
 
-    max_sum = if (current_sum > max_sum) {
+    max_sum = if current_sum > max_sum {
         current_sum
     } else {
         max_sum
