@@ -2,7 +2,7 @@
 
 Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.rust-lang.org/).
 
-This solutions are scaffolded and run using the advent of code rust template by Felix Spöttel ([repo](https://github.com/fspoettel/advent-of-code-rust#download-puzzle-inputs-via-aoc-cli)).
+This solutions are scaffolded and run using the advent of code rust template by Felix Spöttel ([repo](https://github.com/fspoettel/advent-of-code-rust)).
 
 ## Usage
 
