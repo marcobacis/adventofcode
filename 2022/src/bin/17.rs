@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 enum Jet {
     Left,
     Right,
@@ -173,7 +175,64 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    // Need to find a pattern to repeat the most before 1000000000000 pieces
+    // Key: (shape_idx, jet_idx)
+    // Value: (counter, rocks_count, top)
+    let mut repeats: HashMap<(usize, usize), (usize, usize, usize)> = HashMap::new();
+    let mut added_by_repeating: usize = 0;
+    let target = 1_000_000_000_000;
+
+    let mut cave = Cave {
+        jets: parse_input(input),
+        curr_jet: 0,
+        curr_shape: &SHAPES[0],
+        curr_pos: Coord { x: 0, y: 0 },
+        rocks_count: 0,
+        top: 0,
+        map: Vec::new(),
+    };
+
+    while cave.rocks_count != target {
+        // As part 1
+        cave.add_rock_on_top();
+        loop {
+            cave.apply_jet();
+            if !cave.move_down() {
+                break;
+            }
+        }
+        cave.settle_current_rock();
+
+        // Check for repetition
+        if added_by_repeating == 0 {
+            let key = (
+                cave.rocks_count % SHAPES.len(), // shape idx
+                cave.curr_jet % cave.jets.len(), // jet idx
+            );
+            // Already seen this pattern 2 times, means if repeats forever
+            if let Some((2, old_rocks_count, old_top)) = repeats.get(&key) {
+                let delta_top = cave.top - old_top;
+                let delta_count = cave.rocks_count - old_rocks_count;
+                let repeats_to_do = (target - cave.rocks_count) / delta_count;
+                added_by_repeating += repeats_to_do * delta_top;
+                cave.rocks_count += repeats_to_do * delta_count;
+            }
+            repeats
+                .entry(key)
+                .and_modify(|(count, old_rocks_count, old_top)| {
+                    *count += 1;
+                    *old_rocks_count = cave.rocks_count;
+                    *old_top = cave.top;
+                })
+                .or_insert((1, cave.rocks_count, cave.top));
+        }
+
+        cave.rocks_count += 1;
+    }
+
+    cave.top += added_by_repeating;
+
+    Some(cave.top as u64)
 }
 
 fn main() {
