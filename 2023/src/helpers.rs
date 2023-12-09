@@ -8,3 +8,9 @@ pub fn get_numbers(str: &str) -> Vec<usize> {
         .filter_map(|s| s.parse::<usize>().ok())
         .collect()
 }
+
+pub fn get_numbers_signed(str: &str) -> Vec<i32> {
+    str.split_whitespace()
+        .filter_map(|s| s.parse::<i32>().ok())
+        .collect()
+}
