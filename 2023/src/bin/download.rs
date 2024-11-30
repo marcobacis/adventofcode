@@ -66,6 +66,7 @@ fn main() {
     cmd_args.append(&mut vec![
         "--input-file".into(),
         tmp_file_path.to_string_lossy().to_string(),
+        "--input-only".into(),
         "--day".into(),
         args.day.to_string(),
         "download".into(),
