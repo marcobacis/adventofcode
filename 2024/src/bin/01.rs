@@ -13,9 +13,9 @@ fn part_one(input: &str) -> u32 {
     right.sort();
 
 
-    let sum = zip(left, right).map(|(n1,n2)| (n1-n2).abs()).sum::<i32>() as u32;
+    
 
-    sum
+    zip(left, right).map(|(n1,n2)| (n1-n2).abs()).sum::<i32>() as u32
 }
 
 fn part_two(input: &str) -> u32 {
