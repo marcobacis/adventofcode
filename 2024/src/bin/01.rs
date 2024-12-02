@@ -1,6 +1,5 @@
 use std::str::FromStr;
 use std::iter::zip;
-use std::env;
 use std::fs;
 
 fn part_one(input: &str) -> u32 {
@@ -32,7 +31,7 @@ fn part_two(input: &str) -> u32 {
 
 fn main() {
     let input = fs::read_to_string("inputs/01.txt").unwrap();
-
+    
     println!("Solution for part 1: {}", part_one(&input));
     println!("Solution for part 2: {}", part_two(&input));
 }

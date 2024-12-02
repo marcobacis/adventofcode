@@ -8,32 +8,59 @@ use std::process::Command;
 
 
 fn main() {
-
     let args: Vec<String> = env::args().collect();
-
-    let mut template = fs::read_to_string("src/bin/template.rs").unwrap();
-
     if args.len() < 2 {
-        panic!("Missing day argument");
+        eprintln!("Missing day argument");
+        std::process::exit(1);
     }
 
-    let day = u32::from_str(&args[1]).unwrap();
+    let day = match u32::from_str(&args[1]) {
+        Ok(num) => num,
+        Err(_) => {
+            eprintln!("Day arugment must be a number");
+            std::process::exit(1);
+        }
+    };
     let day = format!("{:02}", day);
 
-    template.replace("{DAY}", &day);
+    let template = match fs::read_to_string("src/bin/template.rs") {
+        Ok(content) => content,
+        Err(_) => {
+            eprintln!("Couldn´t read the template file!");
+            std::process::exit(1);
+        }
+    };
+
+    let bin_content = template.replace("{DAY}", &day);
 
     let binary_path = format!("src/bin/{}.rs", day);
     if !Path::new(&binary_path).exists() {
-        fs::write(&binary_path, template).unwrap();
+        write_to_file_safe(binary_path, bin_content);
     }
 
     let example_file_path = format!("examples/{}.txt", day);
     if !Path::new(&example_file_path).exists() {
-        fs::write(&example_file_path, "").unwrap();
+        write_to_file_safe(example_file_path, "".into());
     }
 
     let input_file_path = format!("inputs/{}.txt", day);
 
-    let output = Command::new("aoc").args(["download", "--day", &day, "--input-only", "--input-file", &input_file_path]).output().unwrap();
-    println!("{:?}", &output);
+    match Command::new("aoc").args(["download", "--day", &day, "--input-only", "--input-file", &input_file_path]).output() {
+        Ok(_) => println!("Successfully downloaded inputs"),
+        Err(_) => {
+            eprintln!("Error while writing the inputs file {}", input_file_path);
+            std::process::exit(1);
+        },
+    }
+    
+}
+
+fn write_to_file_safe(binary_path: String, bin_content: String) {
+    match fs::write(&binary_path, bin_content) {
+        Ok(_) => {},
+        Err(_) => {
+            eprintln!("Error while writing file {}", binary_path);
+            std::process::exit(1);
+        },
+    }
 }

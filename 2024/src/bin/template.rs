@@ -1,6 +1,3 @@
-use std::str::FromStr;
-use std::iter::zip;
-use std::env;
 use std::fs;
 
 fn part_one(input: &str) -> Option<u32> {
