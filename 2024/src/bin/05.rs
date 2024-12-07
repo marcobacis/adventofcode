@@ -1,4 +1,6 @@
-use std::{cmp::Ordering, collections::HashSet, fs};
+use std::{cmp::Ordering, collections::{HashMap, HashSet}, fs};
+
+use petgraph::{dot::{Config, Dot}, graph::NodeIndex, Graph};
 
 fn load_inputs(input: &str) -> (HashSet<(u32,u32)>, Vec<Vec<u32>>){
     let mut lines = input.lines();
@@ -56,18 +58,32 @@ fn part_two(input: &str) -> Option<u32> {
 
 
 fn main() {
-    let input = fs::read_to_string("inputs/05.txt").unwrap();
+    let input = fs::read_to_string("examples/05.txt").unwrap();
 
-    println!("Solutions 🎄");
-    let result_part_one = part_one(&input);
-    let result_part_two = part_two(&input);
+    // println!("Solutions 🎄");
+    // let result_part_one = part_one(&input);
+    // let result_part_two = part_two(&input);
 
-    if let Some(res) = result_part_one {
-        println!("Part 1: {}", res);
+    // if let Some(res) = result_part_one {
+    //     println!("Part 1: {}", res);
+    // }
+    // if let Some(res) = result_part_two {
+    //     println!("Part 2: {}", res);
+    // }
+
+    let mut graph = Graph::<_, ()>::new();
+
+    let (rules, _) = load_inputs(&input);
+
+    let nodes : HashSet<u32> = rules.iter().flat_map(|(a,b)| vec![*a,*b]).collect();
+    let nodes :HashMap<u32,NodeIndex<u32>>= nodes.iter().map(|n| (*n, graph.add_node(*n))).collect();
+
+
+    for (prev,next) in rules {
+        graph.add_edge(*nodes.get(&prev).unwrap(), *nodes.get(&next).unwrap(), ());        
     }
-    if let Some(res) = result_part_two {
-        println!("Part 2: {}", res);
-    }
+
+    println!("{:?}", Dot::with_config(&graph, &[Config::EdgeNoLabel]));
 }
 
 #[cfg(test)]
