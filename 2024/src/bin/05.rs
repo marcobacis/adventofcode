@@ -5,7 +5,7 @@ fn load_inputs(input: &str) -> (HashSet<(u32,u32)>, Vec<Vec<u32>>){
 
     let mut rules : HashSet<(u32,u32)> = HashSet::new();
     
-    while let Some(line) = lines.next() {
+    for line in lines.by_ref() {
         if line.is_empty() {
             break;
         }
@@ -22,7 +22,7 @@ fn load_inputs(input: &str) -> (HashSet<(u32,u32)>, Vec<Vec<u32>>){
     (rules, sequences)
 }
 
-fn comparator<'d>(rules: &'d HashSet<(u32,u32)>) -> impl Fn(&u32,&u32) -> Ordering + 'd {
+fn comparator(rules: &HashSet<(u32,u32)>) -> impl Fn(&u32,&u32) -> Ordering + '_ {
     move |a: &u32,b: &u32| { if rules.contains(&(*a,*b)) {
             return Ordering::Less;
         } else if rules.contains(&(*b,*a)) {
@@ -36,7 +36,7 @@ fn part_one(input: &str) -> Option<u32> {
     let (rules, sequences) = load_inputs(input);
     let comparator = comparator(&rules);
     Some(sequences.iter()
-        .filter(|s| s.is_sorted_by(|a,b| comparator(&a,&b).is_le()))
+        .filter(|s| s.is_sorted_by(|a,b| comparator(a,b).is_le()))
         .map(|s| s[s.len()/2]).sum())
 }
 
@@ -45,7 +45,7 @@ fn part_two(input: &str) -> Option<u32> {
 
     let comparator = comparator(&rules);
 
-    Some(sequences.iter().filter(|s| !s.is_sorted_by(|a,b| comparator(&a,&b).is_le()))
+    Some(sequences.iter().filter(|s| !s.is_sorted_by(|a,b| comparator(a,b).is_le()))
         .map(|s| {
             let mut s = s.to_vec();
             s.sort_by(&comparator);

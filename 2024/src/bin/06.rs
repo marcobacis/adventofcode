@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, HashSet}, fs, sync::PoisonError};
+use std::{collections::HashSet, fs};
 
 #[derive(Clone)]
 struct Grid {
@@ -33,7 +33,7 @@ impl Grid {
     }
 
     pub fn is_obstacle(&self, pos: &Coordinate) -> bool {
-        match self.get(&pos) {
+        match self.get(pos) {
             Some(c) => c == '#',
             None => false,
         }
@@ -151,14 +151,14 @@ fn guard_steps(initial: Coordinate, grid: &Grid) -> HashSet<Coordinate> {
 
     while grid.is_inside(&guard.position) {
         positions.insert(guard.position);
-        guard.step(&grid);
+        guard.step(grid);
     }
 
     positions
 }
 
 fn part_two(input: &str) -> Option<u32> {
-    let mut grid = Grid::new(input);
+    let grid = Grid::new(input);
 
     let initial = grid.find_first('^').unwrap();
 

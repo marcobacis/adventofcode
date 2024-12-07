@@ -24,7 +24,7 @@ fn part_two(input: &str) -> Option<u32> {
         match c.get(0).map_or("", |m| m.as_str())  {
           "do()" => { enabled = true; },
           "don't()" =>  { enabled = false;} , 
-          &_ => { if(enabled) { results.push((c.get(2).unwrap().as_str().parse::<u32>().unwrap(), c.get(3).unwrap().as_str().parse::<u32>().unwrap()))} }
+          &_ => { if enabled { results.push((c.get(2).unwrap().as_str().parse::<u32>().unwrap(), c.get(3).unwrap().as_str().parse::<u32>().unwrap()))} }
         };
 
     }
@@ -61,7 +61,7 @@ mod tests {
     #[test]
     fn part_two_test() {
         let input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
-        assert_eq!(Some(48), part_two(&input));
+        assert_eq!(Some(48), part_two(input));
     }
 
 }

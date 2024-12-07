@@ -77,7 +77,7 @@ impl Grid {
     }
     
     fn check_x_mas(&self, y: usize, x: usize) -> bool {
-        let directions = vec![(-1,-1),(-1, 1),(1,-1),(1,1)];
+        let directions = [(-1,-1),(-1, 1),(1,-1),(1,1)];
         let coords = directions.iter().map(|(dy,dx)| (y as i32 + dy, x as i32 + dx));
 
         let s : String = self.get_coords(coords);
@@ -110,7 +110,7 @@ mod tests {
 MSAMXMSMSA
 AMXSXMAAMM";
 
-        let grid = Grid::new(&input);
+        let grid = Grid::new(input);
 
         assert_eq!(3, grid.height);
         assert_eq!(10, grid.width);
