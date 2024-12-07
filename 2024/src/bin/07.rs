@@ -8,11 +8,11 @@ fn part_two(input: &str) -> Option<u64> {
     solve(input, is_valid_with_concat)
 }
 
-fn solve(input: &str, valid_fn: impl Fn(u64, &Vec<u64>) -> bool) -> Option<u64> {
+fn solve(input: &str, valid_fn: impl Fn(u64, &[u64]) -> bool) -> Option<u64> {
     Some(input.lines().filter_map(|line| {
         let (result, equation) = line.split_once(": ").unwrap();
         let result = result.parse::<u64>().unwrap();
-        let equation = equation.split(" ").map(|s| s.parse::<u64>().unwrap()).collect();
+        let equation : Vec<u64> = equation.split(" ").map(|s| s.parse::<u64>().unwrap()).collect();
 
         if valid_fn(result, &equation) {
             Some(result)
@@ -22,54 +22,46 @@ fn solve(input: &str, valid_fn: impl Fn(u64, &Vec<u64>) -> bool) -> Option<u64> 
     }).sum::<u64>())
 }
 
-
-fn main() {
-    let input = fs::read_to_string("inputs/07.txt").unwrap();
-
-    println!("Solutions 🎄");
-    let result_part_one = part_one(&input);
-    let result_part_two = part_two(&input);
-
-    if let Some(res) = result_part_one {
-        println!("Part 1: {}", res);
-    }
-    if let Some(res) = result_part_two {
-        println!("Part 2: {}", res);
-    }
-}
-
-fn is_valid_helper(result: u64, equation: &Vec<u64>, operators: &Vec<impl Fn(u64,u64) -> u64>, acc: u64, idx: usize) -> bool {
-    if idx == equation.len()  {
+fn is_valid_helper(result: u64, equation: &[u64], operators: &Vec<impl Fn(u64,u64) -> u64>, acc: u64) -> bool {
+    if equation.is_empty() {
         return acc == result;
     }
     if acc > result {
         return false;
     }
-    operators.iter().any(|op| is_valid_helper(result, equation, operators, op(acc, equation[idx]), idx + 1))
+    operators.iter().any(|op| is_valid_helper(result, &equation[1..], operators, op(acc, equation[0])))
 }
 
-fn is_valid(result: u64, equation: &Vec<u64>) -> bool {
+fn is_valid(result: u64, equation: &[u64]) -> bool {
 
     let operators = vec![
         |a,b| a + b,
         |a,b| a * b,
     ];
 
-    is_valid_helper(result, equation, &operators,equation[0], 1)
+    is_valid_helper(result, &equation[1..], &operators,equation[0])
 }
 
-fn is_valid_with_concat(result: u64, equation: &Vec<u64>) -> bool {
+fn is_valid_with_concat(result: u64, equation: &[u64]) -> bool {
     let operators = vec![
         |a,b| a + b,
         |a,b| a * b,
         |a,b| concat(a,b),
     ];
-    is_valid_helper(result, equation, &operators,  equation[0], 1)
+    is_valid_helper(result, &equation[1..], &operators,  equation[0])
 }
 
 fn concat(left: u64, right: u64) -> u64 {
     left * 10u64.pow(right.ilog10() + 1) + right
 }
+
+
+fn main() {
+    let input = fs::read_to_string("inputs/07.txt").unwrap();
+    advent_of_code::solve(1, &input, part_one);
+    advent_of_code::solve(2, &input, part_two);
+}
+
 
 #[cfg(test)]
 mod tests {

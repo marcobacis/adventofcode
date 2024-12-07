@@ -170,18 +170,10 @@ fn part_two(input: &str) -> Option<u32> {
 
 fn main() {
     let input = fs::read_to_string("inputs/06.txt").unwrap();
-
-    println!("Solutions 🎄");
-    let result_part_one = part_one(&input);
-    let result_part_two = part_two(&input);
-
-    if let Some(res) = result_part_one {
-        println!("Part 1: {}", res);
-    }
-    if let Some(res) = result_part_two {
-        println!("Part 2: {}", res);
-    }
+    advent_of_code::solve(1, &input, part_one);
+    advent_of_code::solve(2, &input, part_two);
 }
+
 
 #[cfg(test)]
 mod tests {

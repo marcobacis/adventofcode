@@ -2,8 +2,7 @@ use std::str::FromStr;
 use std::iter::zip;
 use std::fs;
 
-fn part_one(input: &str) -> u32 {
-    
+fn part_one(input: &str) -> Option<u32> {    
     let (mut left, mut right) : (Vec<i32>, Vec<i32>) = input
         .lines()
         .map(|line| line.split_once("   ").map(|(n1, n2)| (i32::from_str(n1).unwrap(), i32::from_str(n2).unwrap())).unwrap())
@@ -12,28 +11,24 @@ fn part_one(input: &str) -> u32 {
     left.sort();
     right.sort();
 
-
-    
-
-    zip(left, right).map(|(n1,n2)| (n1-n2).abs()).sum::<i32>() as u32
+    Some(zip(left, right).map(|(n1,n2)| (n1-n2).abs()).sum::<i32>() as u32)
 }
 
-fn part_two(input: &str) -> u32 {
+fn part_two(input: &str) -> Option<u32> {
     
     let (left, right) : (Vec<i32>, Vec<i32>) = input
         .lines()
         .map(|line| line.split_once("   ").map(|(n1, n2)| (i32::from_str(n1).unwrap(), i32::from_str(n2).unwrap())).unwrap())
         .unzip();
 
-    left.iter().map(|l| (*l as usize) * right.iter().filter(|r| l == *r).count()).sum::<usize>() as u32
+    Some(left.iter().map(|l| (*l as usize) * right.iter().filter(|r| l == *r).count()).sum::<usize>() as u32)
 }
 
 
 fn main() {
     let input = fs::read_to_string("inputs/01.txt").unwrap();
-    
-    println!("Solution for part 1: {}", part_one(&input));
-    println!("Solution for part 2: {}", part_two(&input));
+    advent_of_code::solve(1, &input, part_one);
+    advent_of_code::solve(2, &input, part_two);
 }
 
 #[cfg(test)]
@@ -51,7 +46,7 @@ mod tests {
 3   9
 3   3";
 
-        assert_eq!(11, part_one(input));
+        assert_eq!(Some(11), part_one(input));
     }
 
     #[test]
@@ -64,7 +59,7 @@ mod tests {
 3   9
 3   3";
 
-        assert_eq!(31, part_two(input));
+        assert_eq!(Some(31), part_two(input));
     }
 
 }
