@@ -1,64 +1,5 @@
 use std::{collections::HashSet, fs};
-
-#[derive(Clone)]
-struct Grid {
-    grid: Vec<char>,
-    height: usize,
-    width: usize,
-}
-
-
-impl Grid {
-    pub fn new(input: &str) -> Self {
-        let lines : Vec<&str> = input.lines().collect();
-        let height = lines.len();
-        let width = lines.first().unwrap().len();
-
-        Grid {
-            height,
-            width,
-            grid: input.chars().filter(|c| !c.is_whitespace()).collect()
-        }
-    }
-
-    fn get(&self, coord: &Coordinate) -> Option<char> {
-        if !self.is_inside(coord) {
-            return None;
-        }
-        Some(self.grid[coord.y as usize * self.width + coord.x as usize])
-    }
-
-    fn is_inside(&self, coordinate: &Coordinate) -> bool {
-        coordinate.y >= 0 && coordinate.y < self.height as i32 && coordinate.x >= 0 && coordinate.x < self.width as i32
-    }
-
-    pub fn is_obstacle(&self, pos: &Coordinate) -> bool {
-        match self.get(pos) {
-            Some(c) => c == '#',
-            None => false,
-        }
-    }
-    
-    fn find_first(&self, arg: char) -> Option<Coordinate> {
-        for y in 0..self.height {
-            for x in 0..self.width {
-                let coordinate =Coordinate{y: y as i32,x: x as i32};
-                if self.get(&coordinate).unwrap() == arg {
-                    return Some(coordinate)
-                }
-            }
-        }
-        None
-    }
-    
-    fn set(&mut self, coordinate: Coordinate, c: char) {
-        if !self.is_inside(&coordinate) {
-            return;
-        }
-
-        self.grid[coordinate.y as usize * self.width + coordinate.x as usize] = c;
-    }
-}
+use advent_of_code::grid::{Grid,Coordinate};
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy)]
 enum Direction {
@@ -68,10 +9,11 @@ enum Direction {
     West
 }
 
-#[derive(PartialEq, Eq, Clone, Copy, Hash)]
-struct Coordinate {
-    y: i32,
-    x: i32,
+pub fn is_obstacle(grid: &Grid, pos: &Coordinate) -> bool {
+    match grid.get(pos) {
+        Some(c) => c == '#',
+        None => false,
+    }
 }
 
 struct Guard {
@@ -91,7 +33,7 @@ impl Guard {
 
     pub fn step(&mut self, grid: &Grid) {
         let next = self.peek_next();
-        if grid.is_obstacle(&next) {
+        if is_obstacle(grid,&next) {
             self.turn();
         } else {
             self.advance();
