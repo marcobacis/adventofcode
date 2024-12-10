@@ -1,6 +1,6 @@
 use std::ops;
 
-#[derive(PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub struct Coordinate {
     pub y: i32,
     pub x: i32,
