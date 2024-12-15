@@ -1,4 +1,7 @@
-use std::{fmt::{self, Display, Formatter}, ops::{Add, Div, Mul, Sub}};
+use std::{
+    fmt::{self, Display, Formatter},
+    ops::{Add, Div, Mul, Sub},
+};
 
 #[derive(PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub struct Coordinate {
@@ -6,10 +9,10 @@ pub struct Coordinate {
     pub x: i32,
 }
 
-const NORTH : Coordinate = Coordinate {y: -1, x: 0};
-const SOUTH : Coordinate = Coordinate {y: 1, x: 0};
-const EAST : Coordinate = Coordinate {y: 0, x: 1};
-const WEST : Coordinate = Coordinate {y: 0, x: -1};
+pub const NORTH: Coordinate = Coordinate { y: -1, x: 0 };
+pub const SOUTH: Coordinate = Coordinate { y: 1, x: 0 };
+pub const EAST: Coordinate = Coordinate { y: 0, x: 1 };
+pub const WEST: Coordinate = Coordinate { y: 0, x: -1 };
 
 impl Coordinate {
     pub fn new(y: i32, x: i32) -> Self {
@@ -17,7 +20,10 @@ impl Coordinate {
     }
 
     pub fn around(&self) -> Vec<Coordinate> {
-        vec![NORTH,EAST,SOUTH,WEST].iter().map(|d| *self + *d).collect()
+        [NORTH, EAST, SOUTH, WEST]
+            .iter()
+            .map(|d| *self + *d)
+            .collect()
     }
 }
 
@@ -26,7 +32,6 @@ impl Display for Coordinate {
         write!(f, "({}, {})", self.y, self.x)
     }
 }
-
 
 impl Add<Coordinate> for Coordinate {
     type Output = Coordinate;
@@ -64,7 +69,6 @@ where
         }
     }
 }
-
 
 impl<T> Div<T> for Coordinate
 where

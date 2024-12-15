@@ -1,12 +1,12 @@
-use std::{collections::HashSet, fs};
 use advent_of_code::{coordinate::Coordinate, grid::Grid};
+use std::{collections::HashSet, fs};
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy)]
 enum Direction {
     North,
     East,
     South,
-    West
+    West,
 }
 
 pub fn is_obstacle(grid: &Grid<char>, pos: &Coordinate) -> bool {
@@ -24,16 +24,28 @@ struct Guard {
 impl Guard {
     pub fn peek_next(&self) -> Coordinate {
         match self.direction {
-            Direction::North => Coordinate {y : self.position.y - 1, x: self.position.x},
-            Direction::East => Coordinate {y : self.position.y, x: self.position.x + 1},
-            Direction::South => Coordinate {y : self.position.y + 1, x:self.position.x},
-            Direction::West => Coordinate {y : self.position.y, x: self.position.x - 1},
+            Direction::North => Coordinate {
+                y: self.position.y - 1,
+                x: self.position.x,
+            },
+            Direction::East => Coordinate {
+                y: self.position.y,
+                x: self.position.x + 1,
+            },
+            Direction::South => Coordinate {
+                y: self.position.y + 1,
+                x: self.position.x,
+            },
+            Direction::West => Coordinate {
+                y: self.position.y,
+                x: self.position.x - 1,
+            },
         }
     }
 
     pub fn step(&mut self, grid: &Grid<char>) {
         let next = self.peek_next();
-        if is_obstacle(grid,&next) {
+        if is_obstacle(grid, &next) {
             self.turn();
         } else {
             self.advance();
@@ -58,7 +70,7 @@ fn detect_loop(initial: Coordinate, obstacle: Coordinate, grid: &Grid<char>) -> 
     let mut grid = (*grid).clone();
     grid.set(obstacle, '#');
 
-    let mut positions : HashSet<(Coordinate, Direction)> = HashSet::new();
+    let mut positions: HashSet<(Coordinate, Direction)> = HashSet::new();
 
     let mut guard = Guard {
         position: initial,
@@ -67,15 +79,14 @@ fn detect_loop(initial: Coordinate, obstacle: Coordinate, grid: &Grid<char>) -> 
 
     guard.step(&grid);
 
-    while grid.is_inside(&guard.position) && !positions.contains(&(guard.position, guard.direction)) {
+    while grid.is_inside(&guard.position) && !positions.contains(&(guard.position, guard.direction))
+    {
         positions.insert((guard.position, guard.direction));
         guard.step(&grid);
     }
 
     grid.is_inside(&guard.position)
 }
-
-
 
 fn part_one(input: &str) -> Option<u32> {
     let grid = Grid::<char>::new_chars(input);
@@ -89,7 +100,7 @@ fn guard_steps(initial: Coordinate, grid: &Grid<char>) -> HashSet<Coordinate> {
         direction: Direction::North,
     };
 
-    let mut positions : HashSet<Coordinate> = HashSet::new();
+    let mut positions: HashSet<Coordinate> = HashSet::new();
 
     while grid.is_inside(&guard.position) {
         positions.insert(guard.position);
@@ -106,16 +117,19 @@ fn part_two(input: &str) -> Option<u32> {
 
     let positions = guard_steps(initial, &grid);
 
-    Some(positions.iter().filter(|pos| detect_loop(initial, **pos, &grid)).count() as u32)
+    Some(
+        positions
+            .iter()
+            .filter(|pos| detect_loop(initial, **pos, &grid))
+            .count() as u32,
+    )
 }
-
 
 fn main() {
     let input = fs::read_to_string("inputs/06.txt").unwrap();
     advent_of_code::solve(1, &input, part_one);
     advent_of_code::solve(2, &input, part_two);
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -133,5 +147,4 @@ mod tests {
         let input = fs::read_to_string("examples/06.txt").unwrap();
         assert_eq!(Some(6), part_two(&input));
     }
-
 }

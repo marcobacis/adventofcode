@@ -8,7 +8,6 @@ fn part_two(input: &str) -> Option<u32> {
     None
 }
 
-
 fn main() {
     let input = fs::read_to_string("inputs/{DAY}.txt").unwrap();
     advent_of_code::solve(1, &input, part_one);
@@ -31,5 +30,4 @@ mod tests {
         let input = fs::read_to_string("examples/{DAY}.txt").unwrap();
         assert_eq!(None, part_two(&input));
     }
-
 }

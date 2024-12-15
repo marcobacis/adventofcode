@@ -53,7 +53,7 @@ fn expand_part_one(input: &str) -> Vec<Block> {
     let mut id: u64 = 0;
     let mut is_file = true;
     for c in chars {
-        let chunk_size = (c - '0' as u8) as usize;
+        let chunk_size = (c - b'0') as usize;
         for _ in 0..chunk_size {
             out.push(if is_file {
                 Block::File(id, 1)
@@ -66,7 +66,7 @@ fn expand_part_one(input: &str) -> Vec<Block> {
         }
         is_file = !is_file;
     }
-    return out;
+    out
 }
 
 fn expand_part_two(input: &str) -> Vec<Block> {
@@ -75,7 +75,7 @@ fn expand_part_two(input: &str) -> Vec<Block> {
     let mut id: u64 = 0;
     let mut is_file = true;
     for c in chars {
-        let chunk_size = (c - '0' as u8) as usize;
+        let chunk_size = (c - b'0') as usize;
         out.push(if is_file {
             Block::File(id, chunk_size)
         } else {
@@ -86,7 +86,7 @@ fn expand_part_two(input: &str) -> Vec<Block> {
         }
         is_file = !is_file;
     }
-    return out;
+    out
 }
 
 fn checksum(input: &Vec<Block>) -> u64 {
@@ -117,9 +117,7 @@ fn defrag_part_one(input: &mut Vec<Block>) {
 
         if input[left].is_free() && left < right {
             // Swap
-            let tmp = input[left];
-            input[left] = input[right];
-            input[right] = tmp;
+            input.swap(left, right);
         }
     }
 }

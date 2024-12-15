@@ -7,21 +7,36 @@ fn main() {
 }
 
 fn part_one(input: &str) -> Option<u32> {
-    Some(input.lines().map(|l| {
-        let report  = extract_numbers(l);    
-        is_safe(&report)
-    }).filter(|safe| *safe).count() as u32)
+    Some(
+        input
+            .lines()
+            .map(|l| {
+                let report = extract_numbers(l);
+                is_safe(&report)
+            })
+            .filter(|safe| *safe)
+            .count() as u32,
+    )
 }
 
 fn part_two(input: &str) -> Option<u32> {
-    Some(input.lines().map(|l| {
-        let report  = extract_numbers(l);    
-        is_safe_dampener(&report)
-    }).filter(|safe| *safe).count() as u32)
+    Some(
+        input
+            .lines()
+            .map(|l| {
+                let report = extract_numbers(l);
+                is_safe_dampener(&report)
+            })
+            .filter(|safe| *safe)
+            .count() as u32,
+    )
 }
 
 fn extract_numbers(report: &str) -> Vec<i32> {
-    let numbers : Vec<i32> = report.split(' ').map(|n| n.parse::<i32>().unwrap()).collect();
+    let numbers: Vec<i32> = report
+        .split(' ')
+        .map(|n| n.parse::<i32>().unwrap())
+        .collect();
     numbers
 }
 
@@ -41,20 +56,19 @@ fn is_safe_dampener(numbers: &Vec<i32>) -> bool {
 
     let len = numbers.len();
     (0..len).any(|i| {
-        let mut removed : Vec<i32> = numbers.to_vec();
+        let mut removed: Vec<i32> = numbers.to_vec();
         removed.remove(i);
         is_safe(&removed)
     })
 }
 
 fn compute_diffs(numbers: &Vec<i32>) -> Vec<i32> {
-    let mut diffs : Vec<i32> = vec![0 ; numbers.len() - 1];
-    for i in 0..(numbers.len()-1) {
-        diffs[i] = numbers[i] - numbers[i+1];
+    let mut diffs: Vec<i32> = vec![0; numbers.len() - 1];
+    for i in 0..(numbers.len() - 1) {
+        diffs[i] = numbers[i] - numbers[i + 1];
     }
     diffs
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -102,5 +116,4 @@ mod tests {
         let input = fs::read_to_string("examples/02.txt").unwrap();
         assert_eq!(Some(4), part_two(&input));
     }
-
 }

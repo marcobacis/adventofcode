@@ -20,7 +20,7 @@ impl<T> Grid<T> {
 
         let grid = lines
             .iter()
-            .flat_map(|line| line.split(separator).map(|item| parser(item)))
+            .flat_map(|line| line.split(separator).map(&parser))
             .collect();
 
         Self {
@@ -52,7 +52,6 @@ impl<T> Grid<T> {
             && coordinate.x < self.width as i32
     }
 }
-
 
 impl Grid<char> {
     pub fn new_chars(input: &str) -> Self {
@@ -113,14 +112,14 @@ where
     pub fn new_numeric_chars(input: &str) -> Self {
         let lines: Vec<&str> = input.lines().collect();
         let height = lines.len();
-        let width = lines
-            .first()
-            .map(|line| line.chars().count())
-            .unwrap_or(0);
+        let width = lines.first().map(|line| line.chars().count()).unwrap_or(0);
 
         let grid = lines
             .iter()
-            .flat_map(|line| line.chars().map(|item| item.to_string().parse::<T>().unwrap()))
+            .flat_map(|line| {
+                line.chars()
+                    .map(|item| item.to_string().parse::<T>().unwrap())
+            })
             .collect();
 
         Grid {

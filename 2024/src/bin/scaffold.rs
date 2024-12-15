@@ -1,9 +1,8 @@
 use std::env;
 use std::fs;
-use std::str::FromStr;
 use std::path::Path;
 use std::process::Command;
-
+use std::str::FromStr;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -43,22 +42,31 @@ fn main() {
 
     let input_file_path = format!("inputs/{}.txt", day);
 
-    match Command::new("aoc").args(["download", "--day", &day, "--input-only", "--input-file", &input_file_path]).output() {
+    match Command::new("aoc")
+        .args([
+            "download",
+            "--day",
+            &day,
+            "--input-only",
+            "--input-file",
+            &input_file_path,
+        ])
+        .output()
+    {
         Ok(_) => println!("Successfully downloaded inputs"),
         Err(_) => {
             eprintln!("Error while writing the inputs file {}", input_file_path);
             std::process::exit(1);
-        },
+        }
     }
-    
 }
 
 fn write_to_file_safe(binary_path: String, bin_content: String) {
     match fs::write(&binary_path, bin_content) {
-        Ok(_) => {},
+        Ok(_) => {}
         Err(_) => {
             eprintln!("Error while writing file {}", binary_path);
             std::process::exit(1);
-        },
+        }
     }
 }

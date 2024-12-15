@@ -9,59 +9,64 @@ fn part_two(input: &str) -> Option<u64> {
 }
 
 fn solve(input: &str, valid_fn: impl Fn(u64, &[u64]) -> bool) -> Option<u64> {
-    Some(input.lines().filter_map(|line| {
-        let (result, equation) = line.split_once(": ").unwrap();
-        let result = result.parse::<u64>().unwrap();
-        let equation : Vec<u64> = equation.split(" ").map(|s| s.parse::<u64>().unwrap()).collect();
+    Some(
+        input
+            .lines()
+            .filter_map(|line| {
+                let (result, equation) = line.split_once(": ").unwrap();
+                let result = result.parse::<u64>().unwrap();
+                let equation: Vec<u64> = equation
+                    .split(" ")
+                    .map(|s| s.parse::<u64>().unwrap())
+                    .collect();
 
-        if valid_fn(result, &equation) {
-            Some(result)
-        } else {
-            None
-        }
-    }).sum::<u64>())
+                if valid_fn(result, &equation) {
+                    Some(result)
+                } else {
+                    None
+                }
+            })
+            .sum::<u64>(),
+    )
 }
 
-fn is_valid_helper(result: u64, equation: &[u64], operators: &Vec<impl Fn(u64,u64) -> u64>, acc: u64) -> bool {
+fn is_valid_helper(
+    result: u64,
+    equation: &[u64],
+    operators: &Vec<impl Fn(u64, u64) -> u64>,
+    acc: u64,
+) -> bool {
     if equation.is_empty() {
         return acc == result;
     }
     if acc > result {
         return false;
     }
-    operators.iter().any(|op| is_valid_helper(result, &equation[1..], operators, op(acc, equation[0])))
+    operators
+        .iter()
+        .any(|op| is_valid_helper(result, &equation[1..], operators, op(acc, equation[0])))
 }
 
 fn is_valid(result: u64, equation: &[u64]) -> bool {
+    let operators = vec![|a, b| a + b, |a, b| a * b];
 
-    let operators = vec![
-        |a,b| a + b,
-        |a,b| a * b,
-    ];
-
-    is_valid_helper(result, &equation[1..], &operators,equation[0])
+    is_valid_helper(result, &equation[1..], &operators, equation[0])
 }
 
 fn is_valid_with_concat(result: u64, equation: &[u64]) -> bool {
-    let operators = vec![
-        |a,b| a + b,
-        |a,b| a * b,
-        |a,b| concat(a,b),
-    ];
-    is_valid_helper(result, &equation[1..], &operators,  equation[0])
+    let operators = vec![|a, b| a + b, |a, b| a * b, |a, b| concat(a, b)];
+    is_valid_helper(result, &equation[1..], &operators, equation[0])
 }
 
 fn concat(left: u64, right: u64) -> u64 {
     left * 10u64.pow(right.ilog10() + 1) + right
 }
 
-
 fn main() {
     let input = fs::read_to_string("inputs/07.txt").unwrap();
     advent_of_code::solve(1, &input, part_one);
     advent_of_code::solve(2, &input, part_two);
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -94,16 +99,19 @@ mod tests {
     #[case(192, vec![17, 8, 14], true)]
     #[case(21037, vec![9, 7, 18, 13], false)]
     #[case(292, vec![11, 6, 16, 20], true)]
-    fn test_equation_check_with_concat(#[case] result: u64, #[case] equation: Vec<u64>, #[case] valid: bool) {
+    fn test_equation_check_with_concat(
+        #[case] result: u64,
+        #[case] equation: Vec<u64>,
+        #[case] valid: bool,
+    ) {
         assert_eq!(valid, is_valid_with_concat(result, &equation));
     }
 
-
     #[test]
     fn test_concat() {
-        assert_eq!(1122,concat(11,22));
-        assert_eq!(32100,concat(32,100));
-        assert_eq!(486,concat(48,6));
+        assert_eq!(1122, concat(11, 22));
+        assert_eq!(32100, concat(32, 100));
+        assert_eq!(486, concat(48, 6));
     }
 
     #[test]
@@ -117,5 +125,4 @@ mod tests {
         let input = fs::read_to_string("examples/07.txt").unwrap();
         assert_eq!(Some(11387), part_two(&input));
     }
-
 }
