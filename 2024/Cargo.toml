@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+colored = "2.2.0"
 itertools = "0.13.0"
 regex = "1.11.1"
 rstest = "0.23.0"
