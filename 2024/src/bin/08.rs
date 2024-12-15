@@ -3,23 +3,23 @@ use std::{
     fs,
 };
 
-use advent_of_code::grid::{Coordinate, Grid};
+use advent_of_code::{coordinate::Coordinate, grid::Grid};
 
 
-fn load_inputs(input: &str) -> (Grid, HashMap<char, Vec<Coordinate>>) {
-    let grid = Grid::new(input);
+fn load_inputs(input: &str) -> (Grid<char>, HashMap<char, Vec<Coordinate>>) {
+    let grid = Grid::new_chars(input);
 
     let mut antennas: HashMap<char, Vec<Coordinate>> = HashMap::new();
     for y in 0..grid.height {
         for x in 0..grid.width {
             let coord = Coordinate::new(y as i32, x as i32);
             let value = grid.get(&coord).unwrap();
-            if value != '.' {
+            if *value != '.' {
                 if antennas.contains_key(&value) {
                     let group = antennas.get_mut(&value).unwrap();
                     group.push(coord);
                 } else {
-                    antennas.insert(value, vec![coord]);
+                    antennas.insert(*value, vec![coord]);
                 }
             }
         }
@@ -28,7 +28,7 @@ fn load_inputs(input: &str) -> (Grid, HashMap<char, Vec<Coordinate>>) {
     (grid, antennas)
 }
 
-fn generate_antinodes(grid: &Grid, antennas: &HashMap<char, Vec<Coordinate>>, resonance: bool) -> HashSet<Coordinate> {
+fn generate_antinodes(grid: &Grid<char>, antennas: &HashMap<char, Vec<Coordinate>>, resonance: bool) -> HashSet<Coordinate> {
     let mut antinodes: HashSet<Coordinate> = HashSet::new();
 
     // Generate antinodes for each pair of antennas of same frequency
@@ -49,7 +49,7 @@ fn generate_antinodes(grid: &Grid, antennas: &HashMap<char, Vec<Coordinate>>, re
     antinodes.iter().filter_map(|c| if grid.is_inside(c) { Some(*c)} else { None}).collect()
 }
 
-fn compute_antinodes(grid: &Grid, a: Coordinate, b: Coordinate, resonance: bool) -> Vec<Coordinate> {
+fn compute_antinodes(grid: &Grid<char>, a: Coordinate, b: Coordinate, resonance: bool) -> Vec<Coordinate> {
     let diff = Coordinate { y: a.y - b.y, x: a.x - b.x};
 
     if resonance {

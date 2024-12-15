@@ -1,14 +1,14 @@
 use std::{collections::{HashMap, HashSet, VecDeque}, fs};
 
-use advent_of_code::grid::{Coordinate, Grid};
+use advent_of_code::{coordinate::Coordinate, grid::Grid};
 
 
-fn get_starting_coordinates(grid: &Grid, c: char) -> Vec<Coordinate> {
+fn get_starting_coordinates(grid: &Grid<i8>, c: i8) -> Vec<Coordinate> {
     let mut coordinates = vec![];
     for y in 0..grid.height {
         for x in 0..grid.width {
             let coord = Coordinate::new(y as i32,x as i32);
-            if grid.get(&coord).unwrap() == c {
+            if *grid.get(&coord).unwrap() == c {
                 coordinates.push(coord);
             }
         }
@@ -17,7 +17,7 @@ fn get_starting_coordinates(grid: &Grid, c: char) -> Vec<Coordinate> {
 }
 
 // BFS, see how many 9s are reachable from any 0
-fn score(grid: &Grid, start: &Coordinate) -> u32 {
+fn score(grid: &Grid<i8>, start: &Coordinate) -> u32 {
     let directions = vec![Coordinate::new(-1,0), Coordinate::new(0, -1), Coordinate::new(0,1), Coordinate::new(1,0)];
 
     let mut q : VecDeque<Coordinate> = VecDeque::new();
@@ -30,8 +30,8 @@ fn score(grid: &Grid, start: &Coordinate) -> u32 {
     while !q.is_empty() {
         let current = q.pop_front().unwrap();
         
-        let current_val = grid.get(&current).unwrap() as u8 - '0' as u8;
-        if current_val == 9 {
+        let current_val = grid.get(&current).unwrap();
+        if *current_val == 9 {
             score += 1;
         }
 
@@ -39,8 +39,8 @@ fn score(grid: &Grid, start: &Coordinate) -> u32 {
             .map(|c| current + *c)
             .filter(|c| grid.is_inside(c))
             .filter(|c| {
-                let val =  grid.get(c).unwrap() as u8 - '0' as u8;
-                return val as i8 - current_val as i8 == 1 && !visited.contains(c);
+                let val =  grid.get(c).unwrap();
+                return val - current_val == 1 && !visited.contains(c);
             }).collect();
 
         neighbours.iter().for_each(|c| {
@@ -53,11 +53,11 @@ fn score(grid: &Grid, start: &Coordinate) -> u32 {
 }
 
 // DFS, sum all the 0s we get from a 9 (visiting some nodes multiple times, we don´t care)
-fn rating(grid: &Grid, current: &Coordinate) -> u32 {
+fn rating(grid: &Grid<i8>, current: &Coordinate) -> u32 {
     let directions = vec![Coordinate::new(-1,0), Coordinate::new(0, -1), Coordinate::new(0,1), Coordinate::new(1,0)];
-    let current_val = grid.get(&current).unwrap() as u8 - '0' as u8;
+    let current_val = grid.get(&current).unwrap();
 
-    if current_val == 0 {
+    if *current_val == 0 {
         return 1;
     }
 
@@ -65,8 +65,8 @@ fn rating(grid: &Grid, current: &Coordinate) -> u32 {
             .map(|c| *current + *c)
             .filter(|c| grid.is_inside(c))
             .filter(|c| {
-                let val =  grid.get(c).unwrap() as u8 - '0' as u8;
-                return val as i8 - current_val as i8 == -1;
+                let val =  grid.get(c).unwrap();
+                return val - current_val == -1;
             }).collect();
 
     neighbours.iter().map(|c| rating(grid, c)).sum()
@@ -74,14 +74,14 @@ fn rating(grid: &Grid, current: &Coordinate) -> u32 {
 
 
 fn part_one(input: &str) -> Option<u32> {
-    let grid = Grid::new(input);
-    let start = get_starting_coordinates(&grid, '0');
+    let grid = Grid::<i8>::new_numeric_chars(input);
+    let start = get_starting_coordinates(&grid, 0);
     Some(start.iter().map(|c| score(&grid, c)).sum())
 }
 
 fn part_two(input: &str) -> Option<u32> {
-    let grid = Grid::new(input);
-    let start = get_starting_coordinates(&grid, '9');
+    let grid = Grid::<i8>::new_numeric_chars(input);
+    let start = get_starting_coordinates(&grid, 9);
     Some(start.iter().map(|c| rating(&grid, c)).sum())
 }
 

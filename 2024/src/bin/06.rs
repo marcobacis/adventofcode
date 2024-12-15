@@ -1,5 +1,5 @@
 use std::{collections::HashSet, fs};
-use advent_of_code::grid::{Grid,Coordinate};
+use advent_of_code::{coordinate::Coordinate, grid::Grid};
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy)]
 enum Direction {
@@ -9,9 +9,9 @@ enum Direction {
     West
 }
 
-pub fn is_obstacle(grid: &Grid, pos: &Coordinate) -> bool {
+pub fn is_obstacle(grid: &Grid<char>, pos: &Coordinate) -> bool {
     match grid.get(pos) {
-        Some(c) => c == '#',
+        Some(c) => *c == '#',
         None => false,
     }
 }
@@ -31,7 +31,7 @@ impl Guard {
         }
     }
 
-    pub fn step(&mut self, grid: &Grid) {
+    pub fn step(&mut self, grid: &Grid<char>) {
         let next = self.peek_next();
         if is_obstacle(grid,&next) {
             self.turn();
@@ -54,7 +54,7 @@ impl Guard {
     }
 }
 
-fn detect_loop(initial: Coordinate, obstacle: Coordinate, grid: &Grid) -> bool {
+fn detect_loop(initial: Coordinate, obstacle: Coordinate, grid: &Grid<char>) -> bool {
     let mut grid = (*grid).clone();
     grid.set(obstacle, '#');
 
@@ -78,12 +78,12 @@ fn detect_loop(initial: Coordinate, obstacle: Coordinate, grid: &Grid) -> bool {
 
 
 fn part_one(input: &str) -> Option<u32> {
-    let grid = Grid::new(input);
+    let grid = Grid::<char>::new_chars(input);
     let initial = grid.find_first('^').unwrap();
     Some(guard_steps(initial, &grid).len() as u32)
 }
 
-fn guard_steps(initial: Coordinate, grid: &Grid) -> HashSet<Coordinate> {
+fn guard_steps(initial: Coordinate, grid: &Grid<char>) -> HashSet<Coordinate> {
     let mut guard = Guard {
         position: initial,
         direction: Direction::North,
@@ -100,7 +100,7 @@ fn guard_steps(initial: Coordinate, grid: &Grid) -> HashSet<Coordinate> {
 }
 
 fn part_two(input: &str) -> Option<u32> {
-    let grid = Grid::new(input);
+    let grid = Grid::new_chars(input);
 
     let initial = grid.find_first('^').unwrap();
 
