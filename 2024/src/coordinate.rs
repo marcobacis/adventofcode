@@ -25,6 +25,13 @@ impl Coordinate {
             .map(|d| *self + *d)
             .collect()
     }
+
+    pub fn opposite(&self) -> Self {
+        Self {
+            y: -self.y,
+            x: -self.x
+        }
+    }
 }
 
 impl Display for Coordinate {
