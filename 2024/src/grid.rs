@@ -2,7 +2,7 @@ use std::{fmt::Debug, str::FromStr};
 
 use crate::coordinate::Coordinate;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Grid<T> {
     grid: Vec<T>,
     pub height: usize,

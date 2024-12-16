@@ -8,9 +8,15 @@ use colored::Colorize;
 use itertools::Itertools;
 
 const EMPTY: char = '.';
-const BOX: char = 'O';
+const SMALL_BOX: char = 'O';
+const BOX_LEFT: char = '[';
+const BOX_RIGHT: char = ']';
 const OBSTACLE: char = '#';
 const ROBOT: char = '@';
+
+fn is_valid(c: char) -> bool {
+    c == OBSTACLE || c == EMPTY || c == SMALL_BOX || c == BOX_LEFT || c == BOX_RIGHT || c == ROBOT
+}
 
 fn read_input(input: &str) -> (Grid<char>, Vec<Coordinate>, Coordinate) {
     let lines: Vec<&str> = input.lines().collect();
@@ -18,8 +24,7 @@ fn read_input(input: &str) -> (Grid<char>, Vec<Coordinate>, Coordinate) {
     let grid_input = lines
         .iter()
         .take_while(|&&line| {
-            line.chars()
-                .all(|c| c == '#' || c == '.' || c == 'O' || c == '@')
+            line.chars().all(is_valid)
         })
         .copied()
         .join("\n");
@@ -30,11 +35,12 @@ fn read_input(input: &str) -> (Grid<char>, Vec<Coordinate>, Coordinate) {
             line.len() == 0
                 || line
                     .chars()
-                    .all(|c| c == '#' || c == '.' || c == 'O' || c == '@')
+                    .all(is_valid)
         })
         .join("");
 
     let grid = Grid::<char>::new_chars(&grid_input);
+
     let movements = movements
         .chars()
         .map(|c| match c {
@@ -51,43 +57,66 @@ fn read_input(input: &str) -> (Grid<char>, Vec<Coordinate>, Coordinate) {
     (grid, movements, robot)
 }
 
-fn move_robot(grid: &mut Grid<char>, robot: Coordinate, direction: Coordinate) -> Coordinate {
-    let robot_dest = robot + direction;
-    if !grid.is_inside(&robot_dest) {
-        return robot;
+fn is_vertical(direction: &Coordinate) -> bool {
+    *direction == NORTH || *direction == SOUTH
+}
+
+fn can_move(grid: &Grid<char>, position: Coordinate, direction: Coordinate) -> bool {
+    let dest = position + direction;
+    let value = *grid.get(&dest).unwrap();
+    match value {
+        SMALL_BOX => can_move(grid, dest, direction),
+        OBSTACLE => false,
+        BOX_LEFT => can_move(grid, dest, direction) && (!is_vertical(&direction) || can_move(grid, dest + EAST, direction)),
+        BOX_RIGHT => can_move(grid, dest, direction) && (!is_vertical(&direction) || can_move(grid, dest + WEST, direction)),
+        _ => true,
     }
+}
 
-    if *grid.get(&robot_dest).unwrap() == OBSTACLE {
-        return robot;
+fn do_move(grid: &mut Grid<char>, position: Coordinate, direction: Coordinate) -> Coordinate {
+    let start_value = *grid.get(&position).unwrap();
+
+    let dest = position + direction;
+    let end_value = *grid.get(&dest).unwrap();
+    match end_value {
+        SMALL_BOX => {
+            do_move(grid, dest, direction);
+            grid.set(dest, start_value);
+        },
+        BOX_RIGHT => {
+            if is_vertical(&direction) {
+                do_move(grid, dest + WEST, direction);
+                grid.set(dest + WEST, EMPTY);
+            }
+            do_move(grid, dest, direction);
+            grid.set(dest, start_value);
+        },
+        BOX_LEFT => {
+            if is_vertical(&direction) {
+                do_move(grid, dest + EAST, direction);
+                grid.set(dest + EAST, EMPTY);
+            }
+            do_move(grid, dest, direction);
+            grid.set(dest, start_value);
+        },
+        OBSTACLE => {
+            return position;
+        },
+        _ => {
+            grid.set(dest, start_value);
+        },
     }
+    return dest;
+}
 
-    if *grid.get(&robot_dest).unwrap() == BOX {
-        // Check if it can move
-        let mut box_pos = robot_dest;
-        while *grid.get(&box_pos).unwrap() != OBSTACLE && *grid.get(&box_pos).unwrap() != EMPTY {
-            box_pos = box_pos + direction;
-        }
-
-        // Cannot move boxes
-        if *grid.get(&box_pos).unwrap() == OBSTACLE {
-            return robot;
-        }
-
-        // Move boxes
-        let mut box_pos = robot_dest;
-        grid.set(box_pos, EMPTY);
-        box_pos = box_pos + direction;
-        while *grid.get(&box_pos).unwrap() != OBSTACLE && *grid.get(&box_pos).unwrap() != EMPTY {
-            grid.set(box_pos, BOX);
-            box_pos = box_pos + direction;
-        }
-        grid.set(box_pos, BOX);
+fn step(grid: &mut Grid<char>, robot: Coordinate, direction: Coordinate) -> Coordinate {
+    if can_move(grid, robot, direction) {
+        let robot_dest = do_move(grid, robot, direction);
+        grid.set(robot, EMPTY);
+        robot_dest
+    } else {
+        robot
     }
-
-    grid.set(robot, EMPTY);
-    grid.set(robot_dest, ROBOT);
-
-    robot_dest
 }
 
 fn gps_coordinates_sum(grid: &Grid<char>) -> u32 {
@@ -95,7 +124,8 @@ fn gps_coordinates_sum(grid: &Grid<char>) -> u32 {
     for y in 0..grid.height {
         for x in 0..grid.width {
             let coord = Coordinate::new(y as i32, x as i32);
-            if *grid.get(&coord).unwrap() == BOX {
+            let value = *grid.get(&coord).unwrap();
+            if value == SMALL_BOX || value == BOX_LEFT {
                 sum += coord.y * 100 + coord.x;
             }
         }
@@ -104,25 +134,24 @@ fn gps_coordinates_sum(grid: &Grid<char>) -> u32 {
     sum as u32
 }
 
-fn part_one(input: &str) -> Option<u32> {
+fn solve(input: &str) -> Option<u32> {
     let (mut grid, movements, mut robot) = read_input(input);
-
     for movement in movements {
-        robot = move_robot(&mut grid, robot, movement);
+        robot = step(&mut grid, robot, movement);
     }
-
     Some(gps_coordinates_sum(&grid))
 }
-fn print(grid: &Grid<char>) {
+
+fn print_color(grid: &Grid<char>) {
     print!("\x1b[2J\x1b[H");
 
     for y in 0..grid.height {
-        for x in 0..grid.height {
+        for x in 0..grid.width {
             let c = *grid.get(&Coordinate::new(y as i32, x as i32)).unwrap();
 
             let c = match c {
                 ROBOT =>c.to_string().red(),
-                BOX => c.to_string().blue(),
+                SMALL_BOX | BOX_LEFT | BOX_RIGHT => c.to_string().green(),
                 OBSTACLE => c.to_string().yellow(),
                 c => c.to_string().white(),
             };
@@ -134,27 +163,28 @@ fn print(grid: &Grid<char>) {
     println!();
 }
 
-fn part_one_pretty(input: &str) -> Option<u32> {
+fn solve_pretty(input: &str) -> Option<u32> {
     let (mut grid, movements, mut robot) = read_input(input);
 
     for movement in movements {
-        print(&grid);
-        robot = move_robot(&mut grid, robot, movement);
+        print_color(&grid);
+        robot = step(&mut grid, robot, movement);
         sleep(Duration::from_millis(20));
     }
-    print(&grid);
+    print_color(&grid);
 
     Some(gps_coordinates_sum(&grid))
 }
 
-fn part_two(input: &str) -> Option<u32> {
-    None
-}
-
 fn main() {
-    let input = fs::read_to_string("inputs/15.txt").unwrap();
-    advent_of_code::solve(1, &input, part_one);
-    advent_of_code::solve(2, &input, part_two);
+    let input = fs::read_to_string("inputs/15_1.txt").unwrap();
+    advent_of_code::solve(1, &input, solve);
+
+    let input = fs::read_to_string("inputs/15_2.txt").unwrap();
+    advent_of_code::solve(2, &input, solve);
+
+    // let input = fs::read_to_string("inputs/15_2.txt").unwrap();
+    // solve_pretty(&input);
 }
 
 #[cfg(test)]
@@ -165,18 +195,24 @@ mod tests {
     #[test]
     fn part_one_test_1() {
         let input = fs::read_to_string("examples/15_1.txt").unwrap();
-        assert_eq!(Some(2028), part_one(&input));
+        assert_eq!(Some(2028), solve(&input));
     }
 
     #[test]
     fn part_one_test_2() {
         let input = fs::read_to_string("examples/15_2.txt").unwrap();
-        assert_eq!(Some(10092), part_one(&input));
+        assert_eq!(Some(10092), solve(&input));
     }
 
     #[test]
-    fn part_two_test() {
-        let input = fs::read_to_string("examples/15.txt").unwrap();
-        assert_eq!(None, part_two(&input));
+    fn part_one_test() {
+        let input = fs::read_to_string("inputs/15.txt").unwrap();
+        assert_eq!(Some(1457740), solve(&input));
+    }
+
+    #[test]
+    fn part_two_test_2() {
+        let input = fs::read_to_string("examples/15_4.txt").unwrap();
+        assert_eq!(Some(9021), solve(&input));
     }
 }
