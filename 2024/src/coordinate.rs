@@ -29,7 +29,7 @@ impl Coordinate {
     pub fn opposite(&self) -> Self {
         Self {
             y: -self.y,
-            x: -self.x
+            x: -self.x,
         }
     }
 }

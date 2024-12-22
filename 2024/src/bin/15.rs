@@ -23,20 +23,13 @@ fn read_input(input: &str) -> (Grid<char>, Vec<Coordinate>, Coordinate) {
 
     let grid_input = lines
         .iter()
-        .take_while(|&&line| {
-            line.chars().all(is_valid)
-        })
+        .take_while(|&&line| line.chars().all(is_valid))
         .copied()
         .join("\n");
 
     let movements = lines
         .iter()
-        .skip_while(|&&line| {
-            line.len() == 0
-                || line
-                    .chars()
-                    .all(is_valid)
-        })
+        .skip_while(|&&line| line.is_empty() || line.chars().all(is_valid))
         .join("");
 
     let grid = Grid::<char>::new_chars(&grid_input);
@@ -67,8 +60,14 @@ fn can_move(grid: &Grid<char>, position: Coordinate, direction: Coordinate) -> b
     match value {
         SMALL_BOX => can_move(grid, dest, direction),
         OBSTACLE => false,
-        BOX_LEFT => can_move(grid, dest, direction) && (!is_vertical(&direction) || can_move(grid, dest + EAST, direction)),
-        BOX_RIGHT => can_move(grid, dest, direction) && (!is_vertical(&direction) || can_move(grid, dest + WEST, direction)),
+        BOX_LEFT => {
+            can_move(grid, dest, direction)
+                && (!is_vertical(&direction) || can_move(grid, dest + EAST, direction))
+        }
+        BOX_RIGHT => {
+            can_move(grid, dest, direction)
+                && (!is_vertical(&direction) || can_move(grid, dest + WEST, direction))
+        }
         _ => true,
     }
 }
@@ -82,7 +81,7 @@ fn do_move(grid: &mut Grid<char>, position: Coordinate, direction: Coordinate) -
         SMALL_BOX => {
             do_move(grid, dest, direction);
             grid.set(dest, start_value);
-        },
+        }
         BOX_RIGHT => {
             if is_vertical(&direction) {
                 do_move(grid, dest + WEST, direction);
@@ -90,7 +89,7 @@ fn do_move(grid: &mut Grid<char>, position: Coordinate, direction: Coordinate) -
             }
             do_move(grid, dest, direction);
             grid.set(dest, start_value);
-        },
+        }
         BOX_LEFT => {
             if is_vertical(&direction) {
                 do_move(grid, dest + EAST, direction);
@@ -98,15 +97,15 @@ fn do_move(grid: &mut Grid<char>, position: Coordinate, direction: Coordinate) -
             }
             do_move(grid, dest, direction);
             grid.set(dest, start_value);
-        },
+        }
         OBSTACLE => {
             return position;
-        },
+        }
         _ => {
             grid.set(dest, start_value);
-        },
+        }
     }
-    return dest;
+    dest
 }
 
 fn step(grid: &mut Grid<char>, robot: Coordinate, direction: Coordinate) -> Coordinate {
@@ -150,7 +149,7 @@ fn print_color(grid: &Grid<char>) {
             let c = *grid.get(&Coordinate::new(y as i32, x as i32)).unwrap();
 
             let c = match c {
-                ROBOT =>c.to_string().red(),
+                ROBOT => c.to_string().red(),
                 SMALL_BOX | BOX_LEFT | BOX_RIGHT => c.to_string().green(),
                 OBSTACLE => c.to_string().yellow(),
                 c => c.to_string().white(),

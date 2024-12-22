@@ -1,4 +1,7 @@
-use std::{fmt::{Debug, Display}, str::FromStr};
+use std::{
+    fmt::{Debug, Display},
+    str::FromStr,
+};
 
 use crate::coordinate::Coordinate;
 
@@ -17,7 +20,6 @@ impl<T> Grid<T> {
             .first()
             .map(|line| line.split(separator).count())
             .unwrap_or(0);
-
         let grid = lines
             .iter()
             .flat_map(|line| line.split(separator).map(&parser))
@@ -53,12 +55,15 @@ impl<T> Grid<T> {
     }
 }
 
-impl<T> Grid<T> where T: Clone {
+impl<T> Grid<T>
+where
+    T: Clone,
+{
     pub fn initialize(height: usize, width: usize, value: T) -> Self {
         Self {
             height,
             width,
-            grid: vec![value; height * width]
+            grid: vec![value; height * width],
         }
     }
 }
@@ -68,7 +73,7 @@ impl Grid<bool> {
         Grid::<bool> {
             height,
             width,
-            grid: vec![false; height * width]
+            grid: vec![false; height * width],
         }
     }
 
@@ -87,13 +92,11 @@ impl Grid<bool> {
     }
 
     pub fn toggle(&mut self, position: &Coordinate) {
-        match self.get(position) {
-            Some(value) => self.set(*position, !value),
-            None => ()
+        if let Some(value) = self.get(position) {
+            self.set(*position, !value)
         }
     }
 }
-
 
 impl Grid<char> {
     pub fn new_chars(input: &str) -> Self {
@@ -126,11 +129,14 @@ impl Grid<char> {
     }
 }
 
-impl<T> Grid<T> where T: Display {
+impl<T> Grid<T>
+where
+    T: Display,
+{
     pub fn print(&self, separator: &str) {
         for y in 0..self.height {
             for x in 0..self.width {
-                let value = self.get(&Coordinate::new(y as i32,x as i32)).unwrap();
+                let value = self.get(&Coordinate::new(y as i32, x as i32)).unwrap();
 
                 print!("{}{}", value, separator);
             }
