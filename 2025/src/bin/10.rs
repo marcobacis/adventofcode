@@ -3,6 +3,8 @@ use std::{
     fs,
 };
 
+use microlp::{LinearExpr, Problem};
+
 #[derive(Debug)]
 struct Machine {
     goal: u16,
@@ -15,11 +17,11 @@ impl Machine {
         let splits: Vec<_> = line.split(" ").collect();
 
         let goal_str = splits[0].as_bytes();
-    
+
         let mut goal = 0;
         for i in 0..goal_str.len() {
             if goal_str[i] == b'#' {
-                let mask = 1 << (i-1);
+                let mask = 1 << (i - 1);
                 goal ^= mask;
             }
         }
@@ -91,8 +93,41 @@ fn part_one(input: &str) -> Option<u32> {
     )
 }
 
-fn part_two(input: &str) -> Option<u32> {
-    None
+fn solve_part_two(machine: Machine) -> u64 {
+    let mut problem = Problem::new(microlp::OptimizationDirection::Minimize);
+    let variables: Vec<_> = (0..machine.buttons.len())
+        .map(|i| problem.add_integer_var(1.0, (0, i32::MAX)))
+        .collect();
+
+    for (req_idx, requirement) in machine.requirements.iter().enumerate() {
+        let mut expr = LinearExpr::empty();
+
+        let mut not_empty = false;
+        for btn_idx in 0..machine.buttons.len() {
+            if machine.buttons[btn_idx].iter().any(|r| (*r as usize) == req_idx) {
+                expr.add(variables[btn_idx], 1.0);
+                not_empty = true;
+            }
+        }
+
+        if not_empty {
+            problem.add_constraint(expr, microlp::ComparisonOp::Eq, (*requirement as i16).into());
+        }
+    }
+
+    let solution = problem.solve().unwrap();
+    
+    solution.objective().round() as u64
+}
+
+fn part_two(input: &str) -> Option<u64> {
+    Some(
+        input
+            .lines()
+            .map(Machine::from_str)
+            .map(solve_part_two)
+            .sum(),
+    )
 }
 
 fn main() {
@@ -115,6 +150,6 @@ mod tests {
     #[test]
     fn part_two_test() {
         let input = fs::read_to_string("examples/10.txt").unwrap();
-        assert_eq!(None, part_two(&input));
+        assert_eq!(Some(33), part_two(&input));
     }
 }
