@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.100"
+cached = "0.56.0"
 itertools = "0.14.0"
 microlp = "0.2.11"
 regex = "1.11.1"
